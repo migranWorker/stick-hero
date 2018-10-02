@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Stick hero</title>
+    <style>
+        *{
+            margin:0;
+            padding:0;
+        }
+        .container{
+            width:300px;
+            height:500px;
+            border:1px solid black;
+            margin:50px auto;
+            overflow: hidden;
+            position: relative;
+        }
+        .gameContent{
+            width:600px;
+            height:500px;
+            background-color: yellow;
+            position: relative;
+            left:0;
+        }
+        .left{
+            width:80px;
+            height:200px;
+            position: absolute;
+            left:0;
+            bottom:0;
+            background-color:black;
+        }
+        .middle{
+            width:80px;
+            height:200px;
+            position: absolute;
+            left:220px;
+            bottom:0;
+            background-color:black;
+        }
+        .hero{
+            width:40px;
+            height:40px;
+            background-color:red;
+            position:absolute;
+            left:0;
+            bottom:200px;
+        }
+        .stick{
+            width:0px;
+            height:4px;
+            background-color: green;
+            position: absolute;
+            left:40px;
+            bottom:200px;
+            transform:rotate(-90deg);
+            transform-origin: 0px 4px;
+        }
+        .right{
+            width:80px;
+            height:200px;
+            position: absolute;
+            left:500px;
+            bottom:0;
+            background-color:black;
+        }
+        span{
+            z-index: 10;
+            position: absolute;
+            top:10px;
+            left:100px;
+        }
+        b{
+            color:red;
+        }
+        p{
+            width:300px;
+            margin:10px auto;
+        }
+    </style>
+</head>
+<body>
+    <p><strong>游戏介绍：</strong> 在游戏区域按下鼠标左键，棍子会增长，松开鼠标则停止增长，如果刚好到达在第二个木块上则加一分，否则将会失去游戏资格!</p>
+    <div class="container">
+            <span>当前分数&nbsp;&nbsp;<b>0</b></span>
+        <div class="gameContent">
+            <div class="left"></div>
+            <div class="middle"></div>
+            <div class="right"></div>
+            <div class="hero"></div>
+            <div class="stick"></div>
+        </div>
+    </div>
+    
+    <script>
+        let stick=document.querySelector('.stick');
+        let b=document.querySelector('b');
+        let hero=document.querySelector('.hero');
+        let right=document.querySelector('.right');
+        let left=document.querySelector('.left');
+        let middle=document.querySelector('.middle');
+        let container=document.querySelector('.container');
+        let gameContent=document.querySelector('.gameContent');
+        var isPlaying = false;
+        let onOff=true;
+        let num=0;
+        let timer=null;
+        let falg=0;
+        let onOff2=true;
+        let mark=0;
+        middle.style.width = creatNum(40,80) + "px";
+		middle.style.left = creatNum(81,220) + "px";
+        container.addEventListener('mousedown',function(){
+            if(isPlaying){
+	    		return;
+	    	}
+            clearInterval(timer);
+            timer=setInterval(function(){
+                num+=2;
+                stick.style.width=num +'px';
+            },20)
+        })
+        container.addEventListener('mouseup',function(){
+            if(isPlaying){
+	    		return;
+	    	}
+            clearInterval(timer);
+            middleLeft = middle.offsetLeft;
+            isPlaying=true;
+            next = creatNext();
+	    	right.style.width = next[1] + "px";
+	    	right.style.left = next[0] + "px";
+            stick.style.transition='0.5s';
+            stick.style.transform='rotate(0deg)';
+            if(num>middle.offsetLeft+middle.offsetWidth-40||num<middle.offsetLeft-40){
+                onOff=false;
+            }
+        })
+        stick.addEventListener('transitionend',function(){
+            if(onOff){
+                hero.style.transition='1s';
+                hero.style.left=middle.offsetLeft+'px';
+                mark++;
+                b.innerText=mark;
+            }else{
+                hero.style.transition='1s';
+                hero.style.left=num+'px';
+                onOff2=false;
+                setTimeout(function(){
+                    hero.style.bottom=0;
+                    setTimeout(function(){
+                        var msg = "游戏结束，是否重新开始？";
+                        if (confirm(msg)==true){
+                            window.location.reload();
+                        }else{
+                            return false;
+                        }
+                     
+                    },1000)
+                },1000)
+            }   
+           }
+        )
+        hero.addEventListener('transitionend',function(e){
+            if(onOff){
+                gameContent.style.transition='1s';
+                gameContent.style.left=-middle.offsetLeft+'px';
+                falg=1;
+            }
+            e.stopPropagation();
+
+            }
+        )
+        gameContent.addEventListener('transitionend',function(){
+                if(falg==1&&onOff2){
+                    gameContent.style.transition='none';
+                    gameContent.style.left=0;
+                    hero.style.transition='none';
+                    hero.style.left='0px';
+                    stick.style.transition='none';
+                    stick.style.width='0';
+                    stick.style.transform='rotate(-90deg)';
+                    left.style.width = middle.offsetWidth + "px";
+	    		    middle.style.width = next[1] + "px"; 
+	    		    middle.style.left = next[0] - middleLeft + "px"; 
+                    falg=0;
+                    num=0;
+                    isPlaying=false;
+                    // onOff=true;
+                }
+        })
+       
+        function creatNum(start,end){
+			return parseInt(Math.random()*(end-start)+start)
+		}
+	    function creatNext(){
+	    	var iWidth = creatNum(40,80);
+	    	var iLeft = creatNum(300,220+middleLeft);
+	    	return [iLeft,iWidth];
+	    }
+    </script>
+</body>
+</html>
